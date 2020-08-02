@@ -3,6 +3,7 @@ import { checkAnnounceParameters } from '../../helpers/announceFunctions';
 import { trackerError, announceReply } from '../../helpers/bencodedReplies';
 import { ipv4ToBytes, redisToPeers } from '../../helpers/byteFunctions';
 import { client } from '../../db/redis';
+import { shuffle } from '../../helpers/shuffle';
 
 export default async (req: Request, res: Response) => {
 
