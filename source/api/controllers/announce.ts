@@ -15,7 +15,7 @@ export default async (req: Request, res: Response) => {
     const result = checkAnnounceParameters(query);
 
     if (result === false){
-        res.send(trackerError('Bad Announce Request'));
+        return res.send(trackerError('Bad Announce Request'));
     } else {
         console.log(result);
         // res.send(trackerError('All good!'));
@@ -31,23 +31,34 @@ export default async (req: Request, res: Response) => {
     const leechers: string[] = await client.zrevrangebyscoreAsync(`${result.infohash}_leechers`, score, score - TWO_HOURS);
     const seeders: string[] = await client.zrevrangebyscoreAsync(`${result.infohash}_seeders`, score, score - TWO_HOURS);
 
-    //If left=0 (seeder), we want to return leechers.
-    //If left!=0 (leecher), we want to return seeders (and leechers)
+    shuffle(leechers);
+    shuffle(seeders);
 
-    if (result.left === 0){
+    if (result.event === 'stopped'){
+        //Remove this guy from the pool. Two async calls ezpz
+        client.zrem(`${result.infohash}_seeders`, peerAddress.toString('latin1'));
+        client.zrem(`${result.infohash}_leechers`, peerAddress.toString('latin1'));
+        
+    } else if (result.left === 0){
 
         await client.zaddAsync(`${result.infohash}_seeders`, score, peerAddress.toString('latin1'));
-        console.log(`Nothing left. Leechers =`, redisToPeers(leechers));
+
+        if (result.event === 'completed'){
+            //Remove from leechers
+            client.zrem(`${result.infohash}_leechers`, peerAddress.toString('latin1'));
+        }
+
+        // console.log(`Nothing left. Leechers =`, redisToPeers(leechers));
 
         const reply = announceReply(seeders.length, leechers.length, redisToPeers(leechers.slice(0, 50)));
-        console.log(reply);
+        // console.log(reply);
         res.send(reply);
     } else {
         await client.zaddAsync(`${result.infohash}_leechers`, score, peerAddress.toString('latin1'));
-        console.log(`We've ${result.left} left. Leechers =`, redisToPeers(leechers), `and Seeders=`, redisToPeers(seeders));
+        // console.log(`We've ${result.left} left. Leechers =`, redisToPeers(leechers), `and Seeders=`, redisToPeers(seeders));
 
         const reply = announceReply(seeders.length, leechers.length, redisToPeers([...leechers.slice(0, 50), ...seeders.slice(0, 50)]));
-        console.log(reply);
+        // console.log(reply);
         res.send(reply);
     }
 
