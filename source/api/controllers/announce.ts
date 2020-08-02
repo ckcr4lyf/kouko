@@ -18,12 +18,12 @@ export default async (req: Request, res: Response) => {
     if (result === false){
         return res.send(trackerError('Bad Announce Request'));
     } else {
-        console.log(result);
+        // console.log(result);
         // res.send(trackerError('All good!'));
     }
 
     const peerAddress = Buffer.concat([ipv4ToBytes(ip), result.port]);
-    console.log(peerAddress, peerAddress.toString(), peerAddress.toString('latin1'));
+    // console.log(peerAddress, peerAddress.toString(), peerAddress.toString('latin1'));
 
     const score = Date.now();
     const TWO_HOURS = 1000 * 60 * 60 * 2;
