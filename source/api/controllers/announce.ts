@@ -63,6 +63,13 @@ export default async (req: Request, res: Response) => {
         res.send(reply);
     }
 
+    if (Math.random() < 0.1){
+        //10% chance to trigger a clean
+        console.log(`Cleaning up ${result.infohash}`);
+        client.zremrangebyscore(`${result.infohash}_leechers`, 0, score - TWO_HOURS);
+        client.zremrangebyscore(`${result.infohash}_seeders`, 0, score - TWO_HOURS);
+    }
+
     return;
 
     client.zrevrangebyscore(result.infohash, score, score - TWO_HOURS, 'withscores', (a, b) => {
