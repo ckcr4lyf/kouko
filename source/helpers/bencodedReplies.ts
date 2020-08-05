@@ -8,7 +8,7 @@ export const trackerError = (errorMsg: string) => {
 
 export const announceReply = (noSeeds: number, noLeeches: number, peers: Buffer[]) => {
 
-    const initial = `d8:completei${noSeeds}e10:incompletei${noLeeches}e8:intervali600e12:min intervali300e5:peers${peers.length * 6}:`;
+    const initial = `d8:completei${noSeeds}e10:incompletei${noLeeches}e8:intervali1800e12:min intervali1800e5:peers${peers.length * 6}:`;
     const peerData = Buffer.concat(peers);
     const reply = Buffer.concat([Buffer.from(initial), peerData, Buffer.from('e')]);
 
