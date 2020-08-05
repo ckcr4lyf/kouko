@@ -15,13 +15,14 @@ export default async (req: Request, res: Response) => {
     if (!infohash){
         return res.status(400).send();
     }
-    
+
     if (typeof infohash !== 'string'){
         console.log(infohash);
         return res.status(400).send();
     }
 
-    const cleaned = urlHashToHexString(infohash);
+    const cleaned = urlHashToHexString(infohash).toLowerCase();
+    console.log(cleaned);
 
     if (cleaned.length !== 40){
         return res.status(400).send();
