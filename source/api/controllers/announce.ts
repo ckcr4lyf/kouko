@@ -47,6 +47,7 @@ export default async (req: Request, res: Response) => {
         if (result.event === 'completed'){
             //Remove from leechers
             client.zrem(`${result.infohash}_leechers`, peerAddress.toString('latin1'));
+            client.hincrby(`${result.infohash}`, 'downloaded', 1);
         }
 
         // console.log(`Nothing left. Leechers =`, redisToPeers(leechers));
@@ -70,6 +71,8 @@ export default async (req: Request, res: Response) => {
         client.zremrangebyscore(`${result.infohash}_seeders`, 0, score - TWO_HOURS);
     }
 
+    //Update the seeder, leecher counts.
+    client.hmset(`${result.infohash}`, 'seeders', seeders.length, 'leechers', leechers.length);
     return;
 
     client.zrevrangebyscore(result.infohash, score, score - TWO_HOURS, 'withscores', (a, b) => {

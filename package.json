@@ -11,11 +11,15 @@
   "author": "",
   "license": "ISC",
   "dependencies": {
+    "@types/morgan": "^1.9.1",
     "@types/redis": "^2.8.25",
+    "@types/serve-favicon": "^2.5.0",
     "dotenv": "^8.2.0",
     "express": "^4.17.1",
     "mongoose": "^5.9.26",
-    "redis": "^3.0.2"
+    "morgan": "^1.10.0",
+    "redis": "^3.0.2",
+    "serve-favicon": "^2.5.0"
   },
   "devDependencies": {
     "@types/express": "^4.17.7",

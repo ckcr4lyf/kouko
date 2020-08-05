@@ -18,3 +18,4 @@ client.on('error', (error: any) => {
 
 client.zrevrangebyscoreAsync = promisify(client.zrevrangebyscore).bind(client);
 client.zaddAsync = promisify(client.zadd).bind(client);
+client.hmgetAsync = promisify(client.hmget).bind(client);
