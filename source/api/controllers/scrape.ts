@@ -1,15 +1,15 @@
 import { client } from '../../db/redis';
 import { Request, Response } from 'express';
-import { info } from 'console';
 import { urlHashToHexString } from '../../helpers/byteFunctions';
 import { scrapeReply } from '../../helpers/bencodedReplies';
-import { strict } from 'assert';
+import { scrapeLogger } from '../../helpers/logger';
 
 // import 
 
 export default async (req: Request, res: Response) => {
 
     const query = req.query;
+    const userAgent = req.headers['user-agent'];
     const infohash = query.info_hash;
 
     if (!infohash){
@@ -22,15 +22,14 @@ export default async (req: Request, res: Response) => {
     }
 
     const cleaned = urlHashToHexString(infohash).toLowerCase();
-    console.log(cleaned);
 
     if (cleaned.length !== 40){
         return res.status(400).send();
     }
 
+    scrapeLogger.log(cleaned, `Scrape request from  ${userAgent} @ ${req.ip}`);
     const stats: string[] = await client.hmgetAsync(cleaned, 'seeders', 'leechers', 'downloaded');
     const cleanedStats = stats.map(value => value === null ? '0' : value);
-    // console.log(cleanedStats);
     const reply = scrapeReply(cleaned, cleanedStats[0], cleanedStats[1], cleanedStats[2]);
     res.send(reply);
 }

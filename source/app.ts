@@ -2,9 +2,11 @@ import express from 'express';
 import favicon from 'serve-favicon';
 import path from 'path';
 import { createServer } from 'http';
+import fs from 'fs';
 
 import './config';
 import router from './api/router';
+import { genericLogger } from './helpers/logger';
 
 const app = express();
 
@@ -17,8 +19,14 @@ app.use('/', router);
 const IP = process.env.IP || '127.0.0.1';
 const PORT = parseInt(process.env.PORT || '6969');
 
+//Create the logs folder if it doesn't exist
+const logsDir = path.join(process.cwd(), 'logs');
+if (!fs.existsSync(logsDir) || !fs.lstatSync(logsDir).isDirectory()){
+    fs.mkdirSync(logsDir);
+}
+
 createServer(app).listen(PORT, IP, () => {
-    console.log(`Started server at ${IP}:${PORT}`);
+    genericLogger.log('KOUKO', `Started server at ${IP}:${PORT}`);
 });
 
 process.on('SIGINT', () => {

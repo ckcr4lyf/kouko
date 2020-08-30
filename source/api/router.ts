@@ -16,11 +16,10 @@ const limiter = rateLimit({
 
 router.use('/announce', limiter);
 router.get('/announce', announceHandler);
-
-router.use(morgan(':remote-addr [:date[clf]] ":method :url HTTP/:http-version" :status :res[content-length] - :response-time ms (:user-agent)'))
 router.get('/scrape', scrapeHandler);
 
 //Handle all other requests
+router.use(morgan(':remote-addr [:date[clf]] ":method :url HTTP/:http-version" :status :res[content-length] - :response-time ms (:user-agent)'))
 router.use('/', (req, res, next) => {
     res.sendStatus(204);
 })

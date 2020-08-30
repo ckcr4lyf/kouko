@@ -4,22 +4,21 @@ import { trackerError, announceReply } from '../../helpers/bencodedReplies';
 import { ipv4ToBytes, redisToPeers } from '../../helpers/byteFunctions';
 import { client } from '../../db/redis';
 import { shuffle } from '../../helpers/shuffle';
+import { announceLogger } from '../../helpers/logger';
 
 export default async (req: Request, res: Response) => {
 
     const userAgent = req.headers['user-agent'];
     const ip = req.ip;
 
-    console.log(`Incoming announce from ${userAgent} @ ${ip}`);
+    // console.log(`Incoming announce from ${userAgent} @ ${ip}`);
     const query = req.query;
-
     const result = checkAnnounceParameters(query);
 
     if (result === false){
         return res.send(trackerError('Bad Announce Request'));
     } else {
-        // console.log(result);
-        // res.send(trackerError('All good!'));
+        announceLogger.log(result.infohash, `Incoming announce from ${userAgent} @ ${ip}`);
     }
 
     const peerAddress = Buffer.concat([ipv4ToBytes(ip), result.port]);
