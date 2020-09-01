@@ -4,7 +4,7 @@ import { trackerError, announceReply } from '../../helpers/bencodedReplies';
 import { ipv4ToBytes, redisToPeers } from '../../helpers/byteFunctions';
 import { client } from '../../db/redis';
 import { shuffle } from '../../helpers/shuffle';
-import { announceLogger } from '../../helpers/logger';
+import { announceLogger, genericLogger } from '../../helpers/logger';
 
 export default async (req: Request, res: Response) => {
 
@@ -65,28 +65,12 @@ export default async (req: Request, res: Response) => {
 
     if (Math.random() < 0.1){
         //10% chance to trigger a clean
-        console.log(`Cleaning up ${result.infohash}`);
+        genericLogger.log('CLEAN', `Removing stale peers from ${result.infohash}`)
         client.zremrangebyscore(`${result.infohash}_leechers`, 0, score - TWO_HOURS);
         client.zremrangebyscore(`${result.infohash}_seeders`, 0, score - TWO_HOURS);
     }
 
     //Update the seeder, leecher counts.
     client.hmset(`${result.infohash}`, 'seeders', seeders.length, 'leechers', leechers.length);
-    return;
-
-    client.zrevrangebyscore(result.infohash, score, score - TWO_HOURS, 'withscores', (a, b) => {
-        console.log(a, b);
-
-        for (let x = 0; x < b.length; x+= 2){
-            console.log(`Peer ${Buffer.from(b[x], 'latin1').toString('hex')} has score ${b[x+1]}`);
-        }
-        // for (let x of b){
-        //     console.log(Buffer.from(x, 'latin1'));
-        // }
-        client.zadd(result.infohash, score, peerAddress.toString('latin1'), r => {
-            console.log(r);
-        });
-    })
-
     return;
 }

@@ -12,7 +12,7 @@ class Logger {
     log = (prefix: string, message: string) => {
 
         let timeString = new Date().toISOString();
-        let logEntry = `${timeString} [${prefix}] - ${message}`;
+        let logEntry = `${timeString} [${prefix}] - ${message}\n`;
 
         console.log(logEntry);
         fs.appendFileSync(this.logfile, logEntry);
