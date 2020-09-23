@@ -6,6 +6,15 @@ It supports announces and scrapes, uses Redis as a store for the peers, and expr
 
 This project is currently in development, bugs expected. Feel free to open issues.
 
+## Thanks
+
+<center>
+
+[<img src="https://user-images.githubusercontent.com/6680615/88460516-56eac500-cecf-11ea-8552-584eaaac5297.png" width="300">](https://clients.walkerservers.com/)
+
+Massive Thanks to <a href="https://walkerservers.com/">WalkerServers</a> for sponsoring this project. Check them out for affordable, high performance dedicated servers!
+</center>
+
 # Setup
 
 Make sure you have node.js installed on your machine, and have an instance of redis running locally on port 6379 (TODO: Allow config)
