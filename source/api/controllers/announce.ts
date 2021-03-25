@@ -75,7 +75,7 @@ export default async (req: Request, res: Response) => {
             redis.hincrby(`${result.infohash}`, 'downloaded', 1);
         }
 
-        const reply = announceReply(seeders.length + seedCountMod, leechers.length + leechCountMod, redisToPeers(leechers.slice(0, 50)));
+        const reply = announceReply(seeders.length + seedCountMod, leechers.length + leechCountMod, redisToPeers([...leechers.slice(0, 50), ...seeders.slice(0, 50)]));
         res.send(reply);
     } else {
         
