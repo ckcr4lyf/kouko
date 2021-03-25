@@ -1,10 +1,9 @@
-import { client } from '../../db/redis';
+import redis from '../../db/redis';
 import { Request, Response } from 'express';
 import { urlHashToHexString } from '../../helpers/byteFunctions';
 import { scrapeReply } from '../../helpers/bencodedReplies';
 import { scrapeLogger } from '../../helpers/logger';
 
-// import 
 
 export default async (req: Request, res: Response) => {
 
@@ -28,7 +27,8 @@ export default async (req: Request, res: Response) => {
     }
 
     scrapeLogger.log(cleaned, `Scrape request from  ${userAgent} @ ${req.ip}`);
-    const stats: string[] = await client.hmgetAsync(cleaned, 'seeders', 'leechers', 'downloaded');
+
+    const stats = await redis.hmget(cleaned, 'seeders', 'leechers', 'downloaded');
     const cleanedStats = stats.map(value => value === null ? '0' : value);
     const reply = scrapeReply(cleaned, cleanedStats[0], cleanedStats[1], cleanedStats[2]);
     res.send(reply);

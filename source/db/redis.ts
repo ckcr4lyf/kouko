@@ -1,21 +1,18 @@
-import redis from 'redis';
-import { promisify } from 'util';
+import Redis from 'ioredis';
+import Logger from '../helpers/logger';
 
-//extension to add promisified methods
-interface r extends redis.RedisClient {
-    [key: string]: any
-}
+const REDIS_HOST = process.env.REDIS_HOST || '127.0.0.1';
+const REDIS_PORT = parseInt(process.env.REDIS_PORT || '6379');
 
-export let client: r = redis.createClient({
-    host: '127.0.0.1',
-    port: 6379
+const redis = new Redis(REDIS_PORT, REDIS_HOST);
+const redisLogger = new Logger('REDIS');
+
+redis.on('connect', () => {
+    redisLogger.log('REDIS', `Connected to redis!`);
 });
 
-client.on('error', (error: any) => {
-    console.error(`Error connecting to redis`, error);
-    process.exit(1);
+redis.on('error', error => {
+    redisLogger.log('REDIS', `Error from redis: ${error}`);
 });
 
-client.zrevrangebyscoreAsync = promisify(client.zrevrangebyscore).bind(client);
-client.zaddAsync = promisify(client.zadd).bind(client);
-client.hmgetAsync = promisify(client.hmget).bind(client);
+export default redis;
