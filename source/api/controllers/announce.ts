@@ -2,7 +2,7 @@ import { Request, Response } from 'express';
 import { checkAnnounceParameters } from '../../helpers/announceFunctions';
 import { trackerError, announceReply } from '../../helpers/bencodedReplies';
 import { ipv4ToBytes, redisToPeers } from '../../helpers/byteFunctions';
-import { client } from '../../db/redis';
+import redis from '../../db/redis';
 import { shuffle } from '../../helpers/shuffle';
 import { announceLogger, genericLogger } from '../../helpers/logger';
 
@@ -10,8 +10,6 @@ export default async (req: Request, res: Response) => {
 
     const userAgent = req.headers['user-agent'];
     const ip = req.ip;
-
-    // console.log(`Incoming announce from ${userAgent} @ ${ip}`);
     const query = req.query;
     const result = checkAnnounceParameters(query);
 
@@ -22,55 +20,82 @@ export default async (req: Request, res: Response) => {
     }
 
     const peerAddress = Buffer.concat([ipv4ToBytes(ip), result.port]);
-    // console.log(peerAddress, peerAddress.toString(), peerAddress.toString('latin1'));
 
     const score = Date.now();
     const TWO_HOURS = 1000 * 60 * 60 * 2;
 
-    // const leechers: string[] = await client.zrevrangebyscoreAsync(`${result.infohash}_leechers`, score, score - TWO_HOURS, 'limit', 0, 50);
-    const leechers: string[] = await client.zrevrangebyscoreAsync(`${result.infohash}_leechers`, score, score - TWO_HOURS);
-    const seeders: string[] = await client.zrevrangebyscoreAsync(`${result.infohash}_seeders`, score, score - TWO_HOURS);
+    // Get all seeders & leechers that have announced in the past TWO_HOURS
+    const leechers = await redis.zrangebyscore(`${result.infohash}_leechers`, score - TWO_HOURS, score);
+    const seeders = await redis.zrangebyscore(`${result.infohash}_seeders`, score - TWO_HOURS, score);
+
+    // If they exist in redis, set to 0, else 1
+    const existingSeeder = seeders.some(seeder => seeder === peerAddress.toString('latin1'))
+    const existingLeecher = leechers.some(leecher => leecher === peerAddress.toString('latin1'))
+
+    // Based on this announce, how we change the stats for scrape
+    let seedCountMod = 0;
+    let leechCountMod = 0;
 
     shuffle(leechers);
     shuffle(seeders);
 
     if (result.event === 'stopped'){
-        //Remove this guy from the pool. Two async calls ezpz
-        client.zrem(`${result.infohash}_seeders`, peerAddress.toString('latin1'));
-        client.zrem(`${result.infohash}_leechers`, peerAddress.toString('latin1'));
-        
-    } else if (result.left === 0){
 
-        await client.zaddAsync(`${result.infohash}_seeders`, score, peerAddress.toString('latin1'));
-
-        if (result.event === 'completed'){
-            //Remove from leechers
-            client.zrem(`${result.infohash}_leechers`, peerAddress.toString('latin1'));
-            client.hincrby(`${result.infohash}`, 'downloaded', 1);
+        // NOT a NEW seeder, so we need to remove
+        if (existingSeeder === true){
+            redis.zrem(`${result.infohash}_seeders`, peerAddress.toString('latin1'));
+            seedCountMod -= 1;
         }
 
-        // console.log(`Nothing left. Leechers =`, redisToPeers(leechers));
+        if (existingLeecher === true){
+            redis.zrem(`${result.infohash}_leechers`, peerAddress.toString('latin1'));
+            leechCountMod -= 1;
+        }
 
-        const reply = announceReply(seeders.length, leechers.length, redisToPeers(leechers.slice(0, 50)));
-        // console.log(reply);
+        const reply = announceReply(seeders.length + seedCountMod, leechers.length + leechCountMod, []);
+        res.send(reply);        
+    } else if (result.left === 0){
+
+        // Has the complete file
+
+        // A NEW seeder
+        if (existingSeeder === false){
+            redis.zadd(`${result.infohash}_seeders`, score, peerAddress.toString('latin1'));
+            seedCountMod += 1;
+        }
+
+        if (result.event === 'completed'){
+            
+            // Not a NEW leecher, so we need to remove
+            if (existingLeecher === true){
+                redis.zrem(`${result.infohash}_leechers`, peerAddress.toString('latin1'));
+                leechCountMod -= 1;
+            }
+
+            redis.hincrby(`${result.infohash}`, 'downloaded', 1);
+        }
+
+        const reply = announceReply(seeders.length + seedCountMod, leechers.length + leechCountMod, redisToPeers([...leechers.slice(0, 50), ...seeders.slice(0, 50)]));
         res.send(reply);
     } else {
-        await client.zaddAsync(`${result.infohash}_leechers`, score, peerAddress.toString('latin1'));
-        // console.log(`We've ${result.left} left. Leechers =`, redisToPeers(leechers), `and Seeders=`, redisToPeers(seeders));
+        
+        // A NEW leecher
+        if (existingLeecher === false){
+            redis.zadd(`${result.infohash}_leechers`, score, peerAddress.toString('latin1'));
+            leechCountMod += 1;
+        }
 
-        const reply = announceReply(seeders.length, leechers.length, redisToPeers([...leechers.slice(0, 50), ...seeders.slice(0, 50)]));
-        // console.log(reply);
+        const reply = announceReply(seeders.length + seedCountMod, leechers.length + leechCountMod, redisToPeers([...leechers.slice(0, 50), ...seeders.slice(0, 50)]));
         res.send(reply);
     }
 
     if (Math.random() < 0.1){
         //10% chance to trigger a clean
         genericLogger.log('CLEAN', `Removing stale peers from ${result.infohash}`)
-        client.zremrangebyscore(`${result.infohash}_leechers`, 0, score - TWO_HOURS);
-        client.zremrangebyscore(`${result.infohash}_seeders`, 0, score - TWO_HOURS);
+        redis.zremrangebyscore(`${result.infohash}_leechers`, 0, score - TWO_HOURS);
+        redis.zremrangebyscore(`${result.infohash}_seeders`, 0, score - TWO_HOURS);
     }
 
-    //Update the seeder, leecher counts.
-    client.hmset(`${result.infohash}`, 'seeders', seeders.length, 'leechers', leechers.length);
+    redis.hmset(`${result.infohash}`, 'seeders', seeders.length + seedCountMod, 'leechers', leechers.length + leechCountMod);
     return;
 }

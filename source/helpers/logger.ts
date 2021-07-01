@@ -1,7 +1,7 @@
 import fs from 'fs';
 import path from 'path';
 
-class Logger {
+export default class Logger {
 
     logfile: string;
 
@@ -12,10 +12,10 @@ class Logger {
     log = (prefix: string, message: string) => {
 
         let timeString = new Date().toISOString();
-        let logEntry = `${timeString} [${prefix}] - ${message}\n`;
+        let logEntry = `${timeString} [${prefix}] - ${message}`;
 
         console.log(logEntry);
-        fs.appendFileSync(this.logfile, logEntry);
+        fs.appendFileSync(this.logfile, `${logEntry}\n`);
     }
 }
 
