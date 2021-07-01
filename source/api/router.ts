@@ -4,14 +4,22 @@ import rateLimit from 'express-rate-limit';
 
 import announceHandler from './controllers/announce';
 import scrapeHandler from './controllers/scrape';
+import { checkAnnounceParameters } from '../helpers/announceFunctions';
 
 const router = Router();
 
 //Max 10 announces per 5 minutes, per torrent it shouldn't be more than 1 every 30 anyway.
-//TODO: Limit based on IP + hash.
 const limiter = rateLimit({
     windowMs: 5 * 60 * 1000,
-    max: 10
+    max: 10,
+    keyGenerator: function (req) {
+        const result = checkAnnounceParameters(req.query);
+        if (result === true){
+            return `${req.ip}:${result.infohash}`;
+        } else {
+            return req.ip;
+        }
+    }
 })
 
 router.use('/announce', limiter);
