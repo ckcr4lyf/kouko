@@ -1,10 +1,11 @@
-import { Router } from 'express';
+import express, { Router } from 'express';
 import morgan from 'morgan';
 import rateLimit from 'express-rate-limit';
 
 import announceHandler from './controllers/announce';
 import scrapeHandler from './controllers/scrape';
 import { checkAnnounceParameters } from '../helpers/announceFunctions';
+import path from 'path';
 
 const router = Router();
 
@@ -26,10 +27,8 @@ router.use('/announce', limiter);
 router.get('/announce', announceHandler);
 router.get('/scrape', scrapeHandler);
 
-//Handle all other requests
-router.use(morgan(':remote-addr [:date[clf]] ":method :url HTTP/:http-version" :status :res[content-length] - :response-time ms (:user-agent)'))
-router.use('/', (req, res, next) => {
-    res.sendStatus(204);
-})
+//Handle all other requests by redirect to index.html
+// router.use(morgan(':remote-addr [:date[clf]] ":method :url HTTP/:http-version" :status :res[content-length] - :response-time ms (:user-agent)'))
+router.use('/', express.static(path.join(__dirname, '../../public')));
 
 export default router;
