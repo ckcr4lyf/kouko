@@ -14,10 +14,11 @@ const limiter = rateLimit({
     max: 10,
     keyGenerator: function (req) {
         const result = checkAnnounceParameters(req.query);
-        if (result === true){
-            return `${req.ip}:${result.infohash}`;
-        } else {
+        if (result === false){
             return req.ip;
+        } else {
+            const key = `${req.ip}:${result.infohash}`;
+            return key;
         }
     }
 })
