@@ -5,6 +5,7 @@ import { ipv4ToBytes, redisToPeers } from '../../helpers/byteFunctions';
 import redis from '../../db/redis';
 import { shuffle } from '../../helpers/shuffle';
 import { announceLogger, genericLogger } from '../../helpers/logger';
+import { incrAnnounce, incrBadAnnounce } from '../../helpers/promExporter';
 
 export default async (req: Request, res: Response) => {
 
@@ -14,6 +15,7 @@ export default async (req: Request, res: Response) => {
     const result = checkAnnounceParameters(query);
 
     if (result === false){
+        incrBadAnnounce();
         return res.send(trackerError('Bad Announce Request'));
     } else {
         announceLogger.log(result.infohash, `Incoming announce from ${userAgent} @ ${ip}`);
@@ -97,5 +99,6 @@ export default async (req: Request, res: Response) => {
     }
 
     redis.hmset(`${result.infohash}`, 'seeders', seeders.length + seedCountMod, 'leechers', leechers.length + leechCountMod);
+    incrAnnounce();
     return;
 }
