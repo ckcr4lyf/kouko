@@ -37,7 +37,8 @@ export const prepareExportData = async () => {
 
     exportData += `kouko_http_request_count{status_code="200", method="GET", path="announce"} ${announceCount}\n`;
     exportData += `kouko_http_request_count{status_code="400", method="GET", path="announce"} ${badAnnounceCount}\n`;
-    exportData += `kouko_heap_usage ${memoryUsage}\n`;
+    exportData += `kouko_heap_total ${memoryUsage.heapTotal}\n`;
+    exportData += `kouko_heap_used ${memoryUsage.heapUsed}\n`;
 
     return exportData;
 }
