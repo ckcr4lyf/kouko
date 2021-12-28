@@ -6,8 +6,9 @@ import CONSTANTS from './constants';
  * on the redis key which keeps a count of total number
  * of successful announce requests.
  */
-export const incrAnnounce = (): void => {
+export const incrAnnounce = (reqDuration: number): void => {
     void redis.incr(CONSTANTS.ANNOUNCE_COUNT_KEY);
+    void redis.incrby(CONSTANTS.REQ_DURATION_KEY, reqDuration);
 }
 
 /**
@@ -26,6 +27,7 @@ export const prepareExportData = async () => {
     const announceCount = parseInt(await redis.get(CONSTANTS.ANNOUNCE_COUNT_KEY) || '0');
     const badAnnounceCount = parseInt(await redis.get(CONSTANTS.BAD_ANNOUNCE_COUNT_KEY) || '0');
     const memoryUsage = process.memoryUsage();
+    const avgRequestTime = parseInt(await redis.get(CONSTANTS.REQ_DURATION_KEY) || '0');
 
     if (isNaN(announceCount)){
         throw new Error("announceCount was not a number");
@@ -35,8 +37,13 @@ export const prepareExportData = async () => {
         throw new Error("badAnnounceCount was not a number");
     }
 
+    if (isNaN(avgRequestTime)){
+        throw new Error("avgRequestTime was not a number");
+    }
+
     exportData += `kouko_http_request_count{status_code="200", method="GET", path="announce"} ${announceCount}\n`;
     exportData += `kouko_http_request_count{status_code="400", method="GET", path="announce"} ${badAnnounceCount}\n`;
+    exportData += `kouko_http_request_duration_sum{status_code="200", method="GET", path="announce"} ${avgRequestTime}\n`;
     exportData += `kouko_heap_total ${memoryUsage.heapTotal}\n`;
     exportData += `kouko_heap_used ${memoryUsage.heapUsed}\n`;
 

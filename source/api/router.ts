@@ -1,4 +1,4 @@
-import express, { Router } from 'express';
+import express, { NextFunction, Request, Response, Router } from 'express';
 import morgan from 'morgan';
 import rateLimit from 'express-rate-limit';
 
@@ -22,7 +22,7 @@ const limiter = rateLimit({
             return key;
         }
     }
-})
+});
 
 router.use('/announce', limiter);
 router.get('/announce', announceHandler);

@@ -4,14 +4,14 @@ import { trackerError, announceReply } from '../../helpers/bencodedReplies';
 import { ipv4ToBytes, redisToPeers } from '../../helpers/byteFunctions';
 import redis from '../../db/redis';
 import { shuffle } from '../../helpers/shuffle';
-import { announceLogger, genericLogger } from '../../helpers/logger';
+import { genericLogger } from '../../helpers/logger';
 import { incrAnnounce, incrBadAnnounce } from '../../helpers/promExporter';
 
 export default async (req: Request, res: Response) => {
 
+    const start = performance.now();
     res.set('Connection', 'close');
 
-    const userAgent = req.headers['user-agent'];
     const ip = req.ip;
     const query = req.query;
     const result = checkAnnounceParameters(query);
@@ -101,6 +101,8 @@ export default async (req: Request, res: Response) => {
     }
 
     redis.hmset(`${result.infohash}`, 'seeders', seeders.length + seedCountMod, 'leechers', leechers.length + leechCountMod);
-    incrAnnounce();
+    const end = performance.now();
+    const timeFloored = Math.floor(end - start);
+    incrAnnounce(timeFloored);
     return;
 }
