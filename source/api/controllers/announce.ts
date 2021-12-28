@@ -4,7 +4,7 @@ import { trackerError, announceReply } from '../../helpers/bencodedReplies';
 import { ipv4ToBytes, redisToPeers } from '../../helpers/byteFunctions';
 import redis from '../../db/redis';
 import { shuffle } from '../../helpers/shuffle';
-import { announceLogger, genericLogger } from '../../helpers/logger';
+import { genericLogger } from '../../helpers/logger';
 import { incrAnnounce, incrBadAnnounce } from '../../helpers/promExporter';
 
 export default async (req: Request, res: Response) => {
