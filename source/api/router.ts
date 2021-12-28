@@ -6,7 +6,6 @@ import announceHandler from './controllers/announce';
 import scrapeHandler from './controllers/scrape';
 import { checkAnnounceParameters } from '../helpers/announceFunctions';
 import path from 'path';
-import { performance } from 'perf_hooks';
 
 const router = Router();
 
@@ -23,16 +22,7 @@ const limiter = rateLimit({
             return key;
         }
     }
-})
-
-const measureAnnounceTime = (req: Request, res: Response, next: NextFunction) => {
-    const start = performance.now();
-    res.on('finish', () => {
-        const end = performance.now();
-        const timeFloored = Math.floor(end - start);
-        console.log(`Took ${timeFloored} ms.`);
-    })
-}
+});
 
 router.use('/announce', limiter);
 router.get('/announce', announceHandler);

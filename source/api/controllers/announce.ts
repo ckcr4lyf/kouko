@@ -12,7 +12,6 @@ export default async (req: Request, res: Response) => {
     const start = performance.now();
     res.set('Connection', 'close');
 
-    const userAgent = req.headers['user-agent'];
     const ip = req.ip;
     const query = req.query;
     const result = checkAnnounceParameters(query);
