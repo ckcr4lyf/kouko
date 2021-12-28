@@ -9,6 +9,8 @@ import { incrAnnounce, incrBadAnnounce } from '../../helpers/promExporter';
 
 export default async (req: Request, res: Response) => {
 
+    res.set('Connection', 'close');
+
     const userAgent = req.headers['user-agent'];
     const ip = req.ip;
     const query = req.query;

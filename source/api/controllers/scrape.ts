@@ -7,6 +7,8 @@ import { scrapeLogger } from '../../helpers/logger';
 
 export default async (req: Request, res: Response) => {
 
+    res.set('Connection', 'close');
+
     const query = req.query;
     const userAgent = req.headers['user-agent'];
     const infohash = query.info_hash;
@@ -16,7 +18,6 @@ export default async (req: Request, res: Response) => {
     }
 
     if (typeof infohash !== 'string'){
-        console.log(infohash);
         return res.status(400).send();
     }
 
