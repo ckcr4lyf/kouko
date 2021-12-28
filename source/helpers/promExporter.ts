@@ -7,7 +7,8 @@ import CONSTANTS from './constants';
  * of successful announce requests.
  */
 export const incrAnnounce = (reqDuration: number): void => {
-    void redis.pipeline().incr(CONSTANTS.ANNOUNCE_COUNT_KEY).incrby(CONSTANTS.REQ_DURATION_KEY, reqDuration).exec();
+    void redis.incr(CONSTANTS.ANNOUNCE_COUNT_KEY);
+    void redis.incrby(CONSTANTS.REQ_DURATION_KEY, reqDuration);
 }
 
 /**
