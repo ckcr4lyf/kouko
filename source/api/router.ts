@@ -7,7 +7,6 @@ import scrapeHandler from './controllers/scrape';
 import { checkAnnounceParameters } from '../helpers/announceFunctions';
 import path from 'path';
 import { performance } from 'perf_hooks';
-import { logResponseTime } from '../helpers/promExporter';
 
 const router = Router();
 
@@ -32,7 +31,6 @@ const measureAnnounceTime = (req: Request, res: Response, next: NextFunction) =>
         const end = performance.now();
         const timeFloored = Math.floor(end - start);
         console.log(`Took ${timeFloored} ms.`);
-        logResponseTime(timeFloored);
     })
 }
 
