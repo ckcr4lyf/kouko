@@ -20,7 +20,7 @@ export default async (req: Request, res: Response) => {
         incrBadAnnounce();
         return res.send(trackerError('Bad Announce Request'));
     } else {
-        announceLogger.log(result.infohash, `Incoming announce from ${userAgent} @ ${ip}`);
+        // announceLogger.log(result.infohash, `Incoming announce from ${userAgent} @ ${ip}`);
     }
 
     const peerAddress = Buffer.concat([ipv4ToBytes(ip), result.port]);
