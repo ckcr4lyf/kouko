@@ -6,6 +6,7 @@ import redis from '../../db/redis';
 import { shuffle } from '../../helpers/shuffle';
 import { genericLogger } from '../../helpers/logger';
 import { incrAnnounce, incrBadAnnounce } from '../../helpers/promExporter';
+import { performance } from 'perf_hooks';
 
 export default async (req: Request, res: Response) => {
 
