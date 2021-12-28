@@ -36,7 +36,7 @@ const measureAnnounceTime = (req: Request, res: Response, next: NextFunction) =>
     })
 }
 
-router.use('/announce', limiter, measureAnnounceTime);
+router.use('/announce', limiter);
 router.get('/announce', announceHandler);
 router.get('/scrape', scrapeHandler);
 

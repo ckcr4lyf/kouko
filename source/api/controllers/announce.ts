@@ -9,6 +9,7 @@ import { incrAnnounce, incrBadAnnounce } from '../../helpers/promExporter';
 
 export default async (req: Request, res: Response) => {
 
+    const start = performance.now();
     res.set('Connection', 'close');
 
     const userAgent = req.headers['user-agent'];
@@ -101,6 +102,8 @@ export default async (req: Request, res: Response) => {
     }
 
     redis.hmset(`${result.infohash}`, 'seeders', seeders.length + seedCountMod, 'leechers', leechers.length + leechCountMod);
-    incrAnnounce();
+    const end = performance.now();
+    const timeFloored = Math.floor(end - start);
+    incrAnnounce(timeFloored);
     return;
 }
