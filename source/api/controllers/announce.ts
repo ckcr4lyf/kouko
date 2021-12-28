@@ -93,8 +93,8 @@ export default async (req: Request, res: Response) => {
         res.send(reply);
     }
 
-    if (Math.random() < 0.1){
-        //10% chance to trigger a clean
+    if (Math.random() < 0.001){
+        //0.1% chance to trigger a clean
         genericLogger.log('CLEAN', `Removing stale peers from ${result.infohash}`)
         redis.zremrangebyscore(`${result.infohash}_leechers`, 0, score - TWO_HOURS);
         redis.zremrangebyscore(`${result.infohash}_seeders`, 0, score - TWO_HOURS);
