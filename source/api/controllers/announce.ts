@@ -11,7 +11,6 @@ import { performance } from 'perf_hooks';
 export default async (req: Request, res: Response) => {
 
     const start = performance.now();
-    res.set('Connection', 'close');
 
     const ip = req.ip;
     const query = req.query;
@@ -19,7 +18,9 @@ export default async (req: Request, res: Response) => {
 
     if (result === false){
         incrBadAnnounce();
-        return res.send(trackerError('Bad Announce Request'));
+        res.send(trackerError('Bad Announce Request'));
+        res.socket.end();
+        return;
     } else {
         // announceLogger.log(result.infohash, `Incoming announce from ${userAgent} @ ${ip}`);
     }
@@ -92,6 +93,7 @@ export default async (req: Request, res: Response) => {
 
         const reply = announceReply(seeders.length + seedCountMod, leechers.length + leechCountMod, redisToPeers([...leechers.slice(0, 50), ...seeders.slice(0, 50)]));
         res.send(reply);
+        res.socket.end();
     }
 
     if (Math.random() < 0.001){

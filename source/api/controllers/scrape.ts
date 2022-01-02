@@ -7,8 +7,6 @@ import { scrapeLogger } from '../../helpers/logger';
 
 export default async (req: Request, res: Response) => {
 
-    res.set('Connection', 'close');
-
     const query = req.query;
     const userAgent = req.headers['user-agent'];
     const infohash = query.info_hash;
@@ -33,4 +31,5 @@ export default async (req: Request, res: Response) => {
     const cleanedStats = stats.map(value => value === null ? '0' : value);
     const reply = scrapeReply(cleaned, cleanedStats[0], cleanedStats[1], cleanedStats[2]);
     res.send(reply);
+    res.socket.end();
 }

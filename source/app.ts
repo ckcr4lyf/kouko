@@ -15,6 +15,10 @@ app.disable('x-powered-by');
 app.disable('etag');
 app.use(favicon(path.join(__dirname, '../public', 'favicon.png')));
 app.use(express.json());
+app.use((req, res) => {
+    res.set('Connection', 'close');
+});
+
 app.use('/', router);
 
 const IP = process.env.IP || '127.0.0.1';
@@ -36,7 +40,9 @@ const promApp = express();
 
 promApp.get('/metrics', async (req, res) => {
     const responseText = await prepareExportData();
+    res.set('Connection', 'close');
     res.end(responseText);
+    res.socket.end();
 })
 
 createServer(promApp).listen(PROM_PORT, PROM_IP, () => {
