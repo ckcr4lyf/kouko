@@ -28,7 +28,6 @@ export const getTcpData = (): string => {
         const result = execSync(command).toString().split('\n').filter(el => el !== '').map(el => {
             const trimmed = el.trim();
             const parts = trimmed.split(' ');
-            console.log(parts);
             return `kouko_tcp_stats{state="${parts[1]}"} ${parts[0]}\n`;
         });
 

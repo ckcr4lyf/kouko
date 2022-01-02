@@ -15,8 +15,9 @@ app.disable('x-powered-by');
 app.disable('etag');
 app.use(favicon(path.join(__dirname, '../public', 'favicon.png')));
 app.use(express.json());
-app.use((req, res) => {
+app.use((req, res, next) => {
     res.set('Connection', 'close');
+    next();
 });
 
 app.use('/', router);
