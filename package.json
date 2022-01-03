@@ -4,6 +4,7 @@
   "description": "An HTTP Bittorrent tracker",
   "main": "build/app.js",
   "scripts": {
+    "local": "npm run build && node build/app.js",
     "start": "node build/app.js",
     "dev": "nodemon",
     "build": "tsc -p ."
