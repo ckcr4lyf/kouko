@@ -32,10 +32,18 @@ if (!fs.existsSync(logsDir) || !fs.lstatSync(logsDir).isDirectory()){
 }
 
 const logger = getLogger('app');
+const socketLogger = getLogger('socket');
 
 createServer(app).listen(PORT, IP, () => {
     logger.info(`Started tracker at ${IP}:${PORT}`);
-});
+}).on('connection', (socket) => {
+    const timeout = 10 * 1000; // 10s timeout. A bit harsh but normall it takes < 10ms for proper announce.
+    socket.setTimeout(timeout);
+    socket.once('timeout', () => {
+        socketLogger.warn(`Socket timed out. Will end!`, {ip: socket.remoteAddress, port: socket.remotePort });
+        socket.end();
+    });
+})
 
 const PROM_IP = process.env.PROM_IP || '127.0.0.1';
 const PROM_PORT = parseInt(process.env.PROM_PORT || '9999');
