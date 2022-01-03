@@ -4,9 +4,9 @@ import { trackerError, announceReply } from '../../helpers/bencodedReplies';
 import { ipv4ToBytes, redisToPeers } from '../../helpers/byteFunctions';
 import redis from '../../db/redis';
 import { shuffle } from '../../helpers/shuffle';
-import { genericLogger } from '../../helpers/logger';
 import { incrAnnounce, incrBadAnnounce } from '../../helpers/promExporter';
 import { performance } from 'perf_hooks';
+import { getLogger } from '../../helpers/logger';
 
 export default async (req: Request, res: Response) => {
 
@@ -21,8 +21,6 @@ export default async (req: Request, res: Response) => {
         res.send(trackerError('Bad Announce Request'));
         res.socket.end();
         return;
-    } else {
-        // announceLogger.log(result.infohash, `Incoming announce from ${userAgent} @ ${ip}`);
     }
 
     const peerAddress = Buffer.concat([ipv4ToBytes(ip), result.port]);
@@ -98,7 +96,8 @@ export default async (req: Request, res: Response) => {
 
     if (Math.random() < 0.001){
         //0.1% chance to trigger a clean
-        genericLogger.log('CLEAN', `Removing stale peers from ${result.infohash}`)
+        const cleanLogger = getLogger('clean');
+        cleanLogger.info(`Removing stale peers`, { infohash: result.infohash });
         redis.zremrangebyscore(`${result.infohash}_leechers`, 0, score - TWO_HOURS);
         redis.zremrangebyscore(`${result.infohash}_seeders`, 0, score - TWO_HOURS);
     }

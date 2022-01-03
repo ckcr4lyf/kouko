@@ -1,18 +1,18 @@
 import Redis from 'ioredis';
-import Logger from '../helpers/logger';
+import { getLogger } from '../helpers/logger';
 
 const REDIS_HOST = process.env.REDIS_HOST || '127.0.0.1';
 const REDIS_PORT = parseInt(process.env.REDIS_PORT || '6379');
 
 const redis = new Redis(REDIS_PORT, REDIS_HOST);
-const redisLogger = new Logger('REDIS');
+const redisLogger = getLogger('redis');
 
 redis.on('connect', () => {
-    redisLogger.log('REDIS', `Connected to redis!`);
+    redisLogger.info(`Connected to redis at ${REDIS_HOST}:${REDIS_PORT}`);
 });
 
 redis.on('error', error => {
-    redisLogger.log('REDIS', `Error from redis: ${error}`);
+    redisLogger.error(`Error from redis: ${error}`);
 });
 
 export default redis;

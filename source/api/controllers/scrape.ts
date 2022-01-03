@@ -2,11 +2,12 @@ import redis from '../../db/redis';
 import { Request, Response } from 'express';
 import { urlHashToHexString } from '../../helpers/byteFunctions';
 import { scrapeReply } from '../../helpers/bencodedReplies';
-import { scrapeLogger } from '../../helpers/logger';
+import { getLogger } from '../../helpers/logger';
 
 
 export default async (req: Request, res: Response) => {
 
+    const logger = getLogger('scrape');
     const query = req.query;
     const userAgent = req.headers['user-agent'];
     const infohash = query.info_hash;
@@ -25,7 +26,11 @@ export default async (req: Request, res: Response) => {
         return res.status(400).send();
     }
 
-    scrapeLogger.log(cleaned, `Scrape request from  ${userAgent} @ ${req.ip}`);
+    logger.info(`New scrape request`, {
+        userAgent: userAgent,
+        ip: req.ip,
+        hash: cleaned
+    });
 
     const stats = await redis.hmget(cleaned, 'seeders', 'leechers', 'downloaded');
     const cleanedStats = stats.map(value => value === null ? '0' : value);

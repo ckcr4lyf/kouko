@@ -6,7 +6,7 @@ import fs from 'fs';
 
 import './config';
 import router from './api/router';
-import { genericLogger } from './helpers/logger';
+import { getLogger } from './helpers/logger';
 import { prepareExportData } from './helpers/promExporter';
 
 const app = express();
@@ -26,13 +26,15 @@ const IP = process.env.IP || '127.0.0.1';
 const PORT = parseInt(process.env.PORT || '6969');
 
 //Create the logs folder if it doesn't exist
-const logsDir = path.join(process.cwd(), 'logs');
+const logsDir = path.join(__dirname, '../logs');
 if (!fs.existsSync(logsDir) || !fs.lstatSync(logsDir).isDirectory()){
     fs.mkdirSync(logsDir);
 }
 
+const logger = getLogger('app');
+
 createServer(app).listen(PORT, IP, () => {
-    genericLogger.log('KOUKO', `Started server at ${IP}:${PORT}`);
+    logger.info(`Started tracker at ${IP}:${PORT}`);
 });
 
 const PROM_IP = process.env.PROM_IP || '127.0.0.1';
@@ -47,7 +49,7 @@ promApp.get('/metrics', async (req, res) => {
 })
 
 createServer(promApp).listen(PROM_PORT, PROM_IP, () => {
-    genericLogger.log('PROM METRICS', `Started metrics server at ${PROM_IP}:${PROM_PORT}`);
+    logger.info(`Started prometheus metrics server at ${PROM_IP}:${PROM_PORT}`);
 })
 
 process.on('SIGINT', () => {
