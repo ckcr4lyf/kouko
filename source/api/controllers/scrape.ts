@@ -26,11 +26,11 @@ export default async (req: Request, res: Response) => {
         return res.status(400).send();
     }
 
-    logger.info(`New scrape request`, {
-        userAgent: userAgent,
-        ip: req.ip,
-        hash: cleaned
-    });
+    // logger.info(`New scrape request`, {
+    //     userAgent: userAgent,
+    //     ip: req.ip,
+    //     hash: cleaned
+    // });
 
     const stats = await redis.hmget(cleaned, 'seeders', 'leechers', 'downloaded');
     const cleanedStats = stats.map(value => value === null ? '0' : value);
