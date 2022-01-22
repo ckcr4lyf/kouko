@@ -36,5 +36,5 @@ export default async (req: Request, res: Response) => {
     const cleanedStats = stats.map(value => value === null ? '0' : value);
     const reply = scrapeReply(cleaned, cleanedStats[0], cleanedStats[1], cleanedStats[2]);
     res.send(reply);
-    res.socket.end();
+    res.socket?.end();
 }

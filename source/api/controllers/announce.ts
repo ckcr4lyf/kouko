@@ -7,6 +7,7 @@ import { shuffle } from '../../helpers/shuffle';
 import { incrAnnounce, incrBadAnnounce } from '../../helpers/promExporter';
 import { performance } from 'perf_hooks';
 import { getLogger } from '../../helpers/logger';
+import { updateTorrent } from '../../db/redis-di';
 
 export default async (req: Request, res: Response) => {
 
@@ -19,10 +20,12 @@ export default async (req: Request, res: Response) => {
     if (result === false){
         incrBadAnnounce();
         res.send(trackerError('Bad Announce Request'));
-        res.socket.end();
+        res.socket?.end();
         return;
     }
 
+    updateTorrent(redis, result.infohash);
+    
     const peerAddress = Buffer.concat([ipv4ToBytes(ip), result.port]);
 
     const score = Date.now();
@@ -91,7 +94,7 @@ export default async (req: Request, res: Response) => {
 
         const reply = announceReply(seeders.length + seedCountMod, leechers.length + leechCountMod, redisToPeers([...leechers.slice(0, 50), ...seeders.slice(0, 50)]));
         res.send(reply);
-        res.socket.end();
+        res.socket?.end();
     }
 
     if (Math.random() < 0.001){
