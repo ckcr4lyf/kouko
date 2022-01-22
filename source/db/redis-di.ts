@@ -14,18 +14,8 @@ export const getOldTorrents = (redisClient: Redis): Promise<string[]> => {
 }
 
 export const cleanTorrentData = async (redisClient: Redis, infohash: string): Promise<void> => {
-    const logger = getLogger(`Redis.cleanTorrentData`);
-    const start = performance.now();
-    const [sCount, lCount] = await Promise.all([
-        redisClient.zcount(`${infohash}_seeders`, '-inf', '+inf'),
-        redisClient.zcount(`${infohash}_leechers`, '-inf', '+inf'),
-    ]);
-
-    logger.info(`Found ${sCount} seeders and ${lCount} leechers in the stale sorted sets.`);
     await redisClient.del([infohash, `${infohash}_seeders`, `${infohash}_leechers`]);
     await redisClient.zrem(TORRENTS_KEY, infohash);
-    const end = performance.now();
-    logger.info(`Deleted keys. Total time taken: ${(end - start).toFixed(2)}ms.`);
 }
 
 export const cleanJob = async (redisClient: Redis): Promise<void> => {
