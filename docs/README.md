@@ -1,0 +1,1 @@
+Although this is called as "docs", I guess it is more to store and refer to tech specs as a notepad of sorts

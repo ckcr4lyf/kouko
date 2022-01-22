@@ -8,6 +8,8 @@ import './config';
 import router from './api/router';
 import { getLogger } from './helpers/logger';
 import { prepareExportData } from './helpers/promExporter';
+import redis from './db/redis';
+import { cleanJob } from './db/redis-di';
 
 const app = express();
 
@@ -42,6 +44,10 @@ createServer(app).listen(PORT, IP, () => {
         socket.end();
     });
 })
+
+setInterval(() => {
+    cleanJob(redis);
+}, 1000 * 60 * 5); // Every 5 minutes
 
 const PROM_IP = process.env.PROM_IP || '127.0.0.1';
 const PROM_PORT = parseInt(process.env.PROM_PORT || '9999');
