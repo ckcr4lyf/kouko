@@ -23,6 +23,7 @@ export const cleanTorrentData = async (redisClient: Redis, infohash: string): Pr
 
     logger.info(`Found ${sCount} seeders and ${lCount} leechers in the stale sorted sets.`);
     await redisClient.del([infohash, `${infohash}_seeders`, `${infohash}_leechers`]);
+    await redisClient.zrem(TORRENTS_KEY, infohash);
     const end = performance.now();
     logger.info(`Deleted keys. Total time taken: ${(end - start).toFixed(2)}ms.`);
 }
