@@ -7,6 +7,7 @@ import { shuffle } from '../../helpers/shuffle';
 import { incrAnnounce, incrBadAnnounce } from '../../helpers/promExporter';
 import { performance } from 'perf_hooks';
 import { getLogger } from '../../helpers/logger';
+import { updateTorrent } from '../../db/redis-di';
 
 export default async (req: Request, res: Response) => {
 
@@ -23,6 +24,8 @@ export default async (req: Request, res: Response) => {
         return;
     }
 
+    updateTorrent(redis, result.infohash);
+    
     const peerAddress = Buffer.concat([ipv4ToBytes(ip), result.port]);
 
     const score = Date.now();
