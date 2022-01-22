@@ -57,7 +57,7 @@ promApp.get('/metrics', async (req, res) => {
     const responseText = await prepareExportData();
     res.set('Connection', 'close');
     res.end(responseText);
-    res.socket.end();
+    res.socket?.end();
 })
 
 createServer(promApp).listen(PROM_PORT, PROM_IP, () => {

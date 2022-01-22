@@ -19,7 +19,7 @@ export default async (req: Request, res: Response) => {
     if (result === false){
         incrBadAnnounce();
         res.send(trackerError('Bad Announce Request'));
-        res.socket.end();
+        res.socket?.end();
         return;
     }
 
@@ -91,7 +91,7 @@ export default async (req: Request, res: Response) => {
 
         const reply = announceReply(seeders.length + seedCountMod, leechers.length + leechCountMod, redisToPeers([...leechers.slice(0, 50), ...seeders.slice(0, 50)]));
         res.send(reply);
-        res.socket.end();
+        res.socket?.end();
     }
 
     if (Math.random() < 0.001){
