@@ -1,6 +1,7 @@
 import redis from '../db/redis';
 import CONSTANTS from './constants';
 import { execSync } from 'child_process';
+import { getActiveTorrentCount } from '../db/redis-di';
 
 /**
  * incrAccounce asynchronously calls an INCR operation
@@ -46,6 +47,7 @@ export const prepareExportData = async () => {
     const badAnnounceCount = parseInt(await redis.get(CONSTANTS.BAD_ANNOUNCE_COUNT_KEY) || '0');
     const memoryUsage = process.memoryUsage();
     const avgRequestTime = parseInt(await redis.get(CONSTANTS.REQ_DURATION_KEY) || '0');
+    const activeTorrentsCount = await getActiveTorrentCount(redis);
 
     if (isNaN(announceCount)){
         throw new Error("announceCount was not a number");
@@ -64,6 +66,7 @@ export const prepareExportData = async () => {
     exportData += `kouko_http_request_duration_sum{status_code="200", method="GET", path="announce"} ${avgRequestTime}\n`;
     exportData += `kouko_heap_total ${memoryUsage.heapTotal}\n`;
     exportData += `kouko_heap_used ${memoryUsage.heapUsed}\n`;
+    exportData += `kouko_active_torrents ${activeTorrentsCount}\n`;
     exportData += getTcpData();
 
     return exportData;

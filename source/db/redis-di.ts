@@ -18,6 +18,10 @@ export const cleanTorrentData = async (redisClient: Redis, infohash: string): Pr
     await redisClient.zrem(TORRENTS_KEY, infohash);
 }
 
+export const getActiveTorrentCount = async (redisClient: Redis): Promise<number> => {
+    return redisClient.zcount(TORRENTS_KEY, '-inf', '+inf');
+}
+
 export const cleanJob = async (redisClient: Redis): Promise<void> => {
     const logger = getLogger(`Redis.cleanJob`);
     logger.info(`Starting`);
