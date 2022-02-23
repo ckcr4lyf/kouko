@@ -9,6 +9,7 @@ import { cleanJob } from "./db/redis-di";
 import { getLogger } from "./helpers/logger";
 import { prepareExportData } from "./helpers/promExporter";
 import redis from './db/redis';
+import './config';
 
 const logger = getLogger(`prom-server`);
 
