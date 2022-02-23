@@ -14,6 +14,11 @@ export default async (req: Request, res: Response) => {
     const start = performance.now();
 
     const ip = req.ip;
+
+    if (ip === undefined){
+        return;
+    }
+    
     const query = req.query;
     const result = checkAnnounceParameters(query);
 
