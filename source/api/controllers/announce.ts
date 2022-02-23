@@ -12,8 +12,18 @@ import { updateTorrent } from '../../db/redis-di';
 export default async (req: Request, res: Response) => {
 
     const start = performance.now();
-
+    
+    // Sometimes, weirdly, the IP can be undefined right away
+    // Check once, and if it is, just return, since I guess we can't even do anything else?
     const ip = req.ip;
+    
+    if (ip === undefined){
+        // Count as bad announce still
+        incrBadAnnounce();
+        res.socket?.end();
+        return;
+    }
+
     const query = req.query;
     const result = checkAnnounceParameters(query);
 
