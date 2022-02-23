@@ -28,7 +28,18 @@ export const cleanJob = async (redisClient: Redis): Promise<void> => {
     const start = performance.now();
     const oldHashes = await getOldTorrents(redisClient);
     logger.info(`Total ${oldHashes.length} torrents to clean`);
-    await Promise.all(oldHashes.map(oldHash => cleanTorrentData(redisClient, oldHash)));
+
+    // Let's try pipeline...
+    const pipeline = redisClient.pipeline();
+
+    for (let oldHash of oldHashes){
+        pipeline.del(oldHash, `${oldHash}_seeders`, `${oldHash}_leechers`);
+        pipeline.zrem(TORRENTS_KEY, oldHash);
+    }
+
+    await pipeline.exec();
+
+    // await Promise.all(oldHashes.map(oldHash => cleanTorrentData(redisClient, oldHash)));
     const end = performance.now();
     logger.info(`Completed. Total time taken: ${(end - start).toFixed(2)}ms.`);
 }
