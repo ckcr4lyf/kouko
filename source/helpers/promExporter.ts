@@ -39,13 +39,20 @@ export const getTcpData = (): string => {
     }
 }
 
+export const prepareMemoryExportData = async() => {
+    let exportData = '';
+    const memoryUsage = process.memoryUsage();
+    exportData += `kouko_heap_total ${memoryUsage.heapTotal}\n`;
+    exportData += `kouko_heap_used ${memoryUsage.heapUsed}\n`;
+    return exportData;
+}
+
 export const prepareExportData = async () => {
 
     let exportData = '';
 
     const announceCount = parseInt(await redis.get(CONSTANTS.ANNOUNCE_COUNT_KEY) || '0');
     const badAnnounceCount = parseInt(await redis.get(CONSTANTS.BAD_ANNOUNCE_COUNT_KEY) || '0');
-    const memoryUsage = process.memoryUsage();
     const avgRequestTime = parseInt(await redis.get(CONSTANTS.REQ_DURATION_KEY) || '0');
     const activeTorrentsCount = await getActiveTorrentCount(redis);
 
@@ -64,8 +71,6 @@ export const prepareExportData = async () => {
     exportData += `kouko_http_request_count{status_code="200", method="GET", path="announce"} ${announceCount}\n`;
     exportData += `kouko_http_request_count{status_code="400", method="GET", path="announce"} ${badAnnounceCount}\n`;
     exportData += `kouko_http_request_duration_sum{status_code="200", method="GET", path="announce"} ${avgRequestTime}\n`;
-    exportData += `kouko_heap_total ${memoryUsage.heapTotal}\n`;
-    exportData += `kouko_heap_used ${memoryUsage.heapUsed}\n`;
     exportData += `kouko_active_torrents ${activeTorrentsCount}\n`;
     exportData += getTcpData();
 

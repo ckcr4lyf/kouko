@@ -7,6 +7,7 @@ import fs from 'fs';
 import './config';
 import router from './api/router';
 import { getLogger } from './helpers/logger';
+import { prepareMemoryExportData } from './helpers/promExporter';
 
 const app = express();
 
@@ -45,4 +46,19 @@ createServer(app).listen(PORT, IP, () => {
 process.on('SIGINT', () => {
     console.log(`\nBye bye!`);
     process.exit(0);
+})
+
+const PROM_IP_MAIN = process.env.PROM_IP_MAIN || '127.0.0.1';
+const PROM_PORT_MAIN = parseInt(process.env.PROM_PORT_MAIN || '9998');
+const promApp = express();
+
+promApp.get('/metrics', async (req, res) => {
+    const responseText = await prepareMemoryExportData();
+    res.set('Connection', 'close');
+    res.end(responseText);
+    res.socket?.end();
+})
+
+createServer(promApp).listen(PROM_PORT_MAIN, PROM_IP_MAIN, () => {
+    logger.info(`Started prometheus metrics server at ${PROM_IP_MAIN}:${PROM_PORT_MAIN}`);
 })
