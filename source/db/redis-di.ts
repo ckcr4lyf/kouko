@@ -1,4 +1,4 @@
-import { Redis } from "ioredis";
+import R, { Redis } from "ioredis";
 import { performance } from "perf_hooks";
 import { getLogger } from "../helpers/logger";
 
@@ -26,12 +26,28 @@ export const cleanJob = async (redisClient: Redis): Promise<void> => {
     const logger = getLogger(`Redis.cleanJob`);
     logger.info(`Starting`);
     const start = performance.now();
+    
     const oldHashes = await getOldTorrents(redisClient);
     logger.info(`Total ${oldHashes.length} torrents to clean`);
 
-    // const batches = Math.ceil(oldHashes)
+    const BATCH_SIZE = 1000;
+    const batches = Math.ceil(oldHashes.length / BATCH_SIZE);
 
-    await Promise.all(oldHashes.map(oldHash => cleanTorrentData(redisClient, oldHash)));
+    for (let i = 0; i < batches; i++){
+        const pipeline = redisClient.pipeline();
+        const batchTorrents = oldHashes.slice(i * BATCH_SIZE, (i + 1) * BATCH_SIZE);
+
+        for (let oldHash of batchTorrents){
+            pipeline.del(oldHash)
+            pipeline.del(`${oldHash}_seeders`)
+            pipeline.del(`${oldHash}_leechers`);
+            pipeline.zrem(TORRENTS_KEY, oldHash);
+        }
+        
+        const gg = await pipeline.exec();
+        logger.info(`Completed batch no. ${i+1}/${batches}`);
+    }
+
     const end = performance.now();
     logger.info(`Completed. Total time taken: ${(end - start).toFixed(2)}ms.`);
 }

@@ -72,7 +72,7 @@ export default async (req: Request, res: Response) => {
 
         // A NEW seeder
         if (existingSeeder === false){
-            redis.zaddBuffer(`${result.infohash}_seeders`, score, peerAddress);
+            // redis.zaddBuffer(`${result.infohash}_seeders`, score, peerAddress);
             seedCountMod += 1;
         }
 
@@ -93,7 +93,7 @@ export default async (req: Request, res: Response) => {
         
         // A NEW leecher
         if (existingLeecher === false){
-            redis.zaddBuffer(`${result.infohash}_leechers`, score, peerAddress);
+            // redis.zaddBuffer(`${result.infohash}_leechers`, score, peerAddress);
             leechCountMod += 1;
         }
 

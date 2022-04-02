@@ -4,7 +4,7 @@ import { getLogger } from '../helpers/logger';
 const REDIS_HOST = process.env.REDIS_HOST || '127.0.0.1';
 const REDIS_PORT = parseInt(process.env.REDIS_PORT || '6379');
 
-const redis = new Redis(REDIS_PORT, REDIS_HOST);
+export const redis = new Redis(REDIS_PORT, REDIS_HOST);
 const redisLogger = getLogger('redis');
 
 redis.on('connect', () => {

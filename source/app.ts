@@ -36,11 +36,11 @@ const logger = getLogger('app');
 createServer(app).listen(PORT, IP, () => {
     logger.info(`Started tracker at ${IP}:${PORT}`);
 }).on('connection', (socket) => {
-    const timeout = 10 * 1000; // 10s timeout. A bit harsh but normall it takes < 10ms for proper announce.
-    socket.setTimeout(timeout);
-    socket.once('timeout', () => {
-        socket.end();
-    });
+    // const timeout = 10 * 1000; // 10s timeout. A bit harsh but normall it takes < 10ms for proper announce.
+    // socket.setTimeout(timeout);
+    // socket.once('timeout', () => {
+    //     socket.end();
+    // });
 })
 
 process.on('SIGINT', () => {
@@ -59,6 +59,6 @@ promApp.get('/metrics', async (req, res) => {
     res.socket?.end();
 })
 
-createServer(promApp).listen(PROM_PORT_MAIN, PROM_IP_MAIN, () => {
-    logger.info(`Started prometheus metrics server at ${PROM_IP_MAIN}:${PROM_PORT_MAIN}`);
-})
+// createServer(promApp).listen(PROM_PORT_MAIN, PROM_IP_MAIN, () => {
+//     logger.info(`Started prometheus metrics server at ${PROM_IP_MAIN}:${PROM_PORT_MAIN}`);
+// })
