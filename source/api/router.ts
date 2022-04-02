@@ -24,7 +24,7 @@ const limiter = rateLimit({
     }
 });
 
-router.use('/announce', limiter);
+// router.use('/announce', limiter);
 router.get('/announce', announceHandler);
 router.get('/scrape', scrapeHandler);
 

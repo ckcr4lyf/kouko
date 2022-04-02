@@ -9,8 +9,8 @@ export const updateTorrent = (redisClient: Redis, infohash: string): void => {
 }
 
 export const getOldTorrents = (redisClient: Redis): Promise<string[]> => {
-    const TWO_HOURS = 1000 * 60 * 60 * 2;
-    return redisClient.zrangebyscore(TORRENTS_KEY, 0, Date.now() - TWO_HOURS);
+    const THIRTY_ONE_MINUTES = 1000 * 60 * 31;
+    return redisClient.zrangebyscore(TORRENTS_KEY, 0, Date.now() - THIRTY_ONE_MINUTES);
 }
 
 export const cleanTorrentData = async (redisClient: Redis, infohash: string): Promise<void> => {
