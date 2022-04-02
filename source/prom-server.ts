@@ -34,10 +34,8 @@ promApp.get('/metrics', async (req, res) => {
 
 createServer(promApp).listen(PROM_PORT, PROM_IP, () => {
     logger.info(`Started prometheus metrics server at ${PROM_IP}:${PROM_PORT}`);
-    // cleanJob(redis);
+    cleanJob(redis);
 })
-
-cleanJob(redis);
 
 process.on('SIGINT', () => {
     console.log(`\nBye bye!`);

@@ -39,12 +39,15 @@ export const getTcpData = (): string => {
     }
 }
 
-export const prepareMemoryExportData = async() => {
-    let exportData = '';
-    const memoryUsage = process.memoryUsage();
-    exportData += `kouko_heap_total ${memoryUsage.heapTotal}\n`;
-    exportData += `kouko_heap_used ${memoryUsage.heapUsed}\n`;
-    return exportData;
+export const prepareMemoryExportData = (): string => {
+    const command = `ps -o rss,command ax | grep kiryuu | head -n 1 | awk '{print $1}'`;
+    
+    try {
+        const result = execSync(command).toString().split('\n')[0];
+        return `kiryuu_mem_used_kib ${result}\n`;
+    } catch (e){
+        return ``;
+    }
 }
 
 export const prepareExportData = async () => {
@@ -67,6 +70,7 @@ export const prepareExportData = async () => {
     exportData += `kouko_http_request_duration_sum{status_code="200", method="GET", path="announce"} ${avgRequestTime}\n`;
     exportData += `kouko_active_torrents ${activeTorrentsCount}\n`;
     exportData += getTcpData();
+    exportData += prepareMemoryExportData();
 
     return exportData;
 }
