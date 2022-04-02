@@ -36,7 +36,7 @@ const logger = getLogger('app');
 createServer(app).listen(PORT, IP, () => {
     logger.info(`Started tracker at ${IP}:${PORT}`);
 }).on('connection', (socket) => {
-    const timeout = 2 * 1000; // 2s timeout. A bit harsh but normall it takes < 10ms for proper announce.
+    const timeout = 10 * 1000; // 10s timeout. A bit harsh but normall it takes < 10ms for proper announce.
     socket.setTimeout(timeout);
     socket.once('timeout', () => {
         socket.end();
