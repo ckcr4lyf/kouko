@@ -13,9 +13,9 @@ import './config';
 
 const logger = getLogger(`prom-server`);
 
-setInterval(() => {
-    cleanJob(redis);
-}, 1000 * 60 * 5); // Every 5 minutes
+// setInterval(() => {
+//     cleanJob(redis);
+// }, 1000 * 60 * 10); // Every 10 minutes
 
 const PROM_IP = process.env.PROM_IP || '127.0.0.1';
 const PROM_PORT = parseInt(process.env.PROM_PORT || '9999');

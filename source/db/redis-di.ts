@@ -28,6 +28,9 @@ export const cleanJob = async (redisClient: Redis): Promise<void> => {
     const start = performance.now();
     const oldHashes = await getOldTorrents(redisClient);
     logger.info(`Total ${oldHashes.length} torrents to clean`);
+
+    // const batches = Math.ceil(oldHashes)
+
     await Promise.all(oldHashes.map(oldHash => cleanTorrentData(redisClient, oldHash)));
     const end = performance.now();
     logger.info(`Completed. Total time taken: ${(end - start).toFixed(2)}ms.`);

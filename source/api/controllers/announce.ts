@@ -106,8 +106,8 @@ export default async (req: Request, res: Response) => {
         //0.1% chance to trigger a clean
         const cleanLogger = getLogger('clean');
         cleanLogger.info(`Removing stale peers`, { infohash: result.infohash });
-        redis.zremrangebyscore(`${result.infohash}_leechers`, 0, score - THIRTY_ONE_MINUTES);
-        redis.zremrangebyscore(`${result.infohash}_seeders`, 0, score - THIRTY_ONE_MINUTES);
+        // redis.zremrangebyscore(`${result.infohash}_leechers`, 0, score - THIRTY_ONE_MINUTES);
+        // redis.zremrangebyscore(`${result.infohash}_seeders`, 0, score - THIRTY_ONE_MINUTES);
     }
 
     redis.hmset(`${result.infohash}`, 'seeders', seeders.length + seedCountMod, 'leechers', leechers.length + leechCountMod);
