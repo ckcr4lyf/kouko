@@ -41,9 +41,14 @@ export const getTcpData = (): string => {
 
 export const getRedisData = (): string => {
     const command = `redis-cli info memory`;
+    const acceptable = ['used_memory', 'used_memory_dataset']
     
     try {
-        const result = execSync(command).toString().split('\n').slice(1).filter(el => el !== '').map(el => {
+        const result = execSync(command).toString().split('\n').slice(1).filter(el => {
+            const trimmed = el.trim();
+            const parts = trimmed.split(':');
+            return acceptable.includes(parts[0]);
+        }).map(el => {
             const trimmed = el.trim();
             const parts = trimmed.split(':');
             return `redis_mem_stats_${parts[0]} ${parts[1]}\n`;
