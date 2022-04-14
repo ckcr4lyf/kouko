@@ -39,6 +39,23 @@ export const getTcpData = (): string => {
     }
 }
 
+export const getRedisData = (): string => {
+    const command = `redis-cli info memory`;
+    
+    try {
+        const result = execSync(command).toString().split('\n').slice(1).filter(el => el !== '').map(el => {
+            const trimmed = el.trim();
+            const parts = trimmed.split(':');
+            return `redis_mem_stats_${parts[0]} ${parts[1]}\n`;
+        });
+
+        return result.join('');
+    } catch (e){
+        console.log(`Failed to get redis data`);
+        return ``;
+    }
+}
+
 export const prepareMemoryExportData = (): string => {
     const command = `ps -o rss,command ax | grep ./kiryuu | head -n 1 | awk '{print $1}'`;
     
@@ -71,6 +88,7 @@ export const prepareExportData = async () => {
     exportData += `kouko_active_torrents ${activeTorrentsCount}\n`;
     exportData += getTcpData();
     exportData += prepareMemoryExportData();
+    exportData += getRedisData();
 
     return exportData;
 }
