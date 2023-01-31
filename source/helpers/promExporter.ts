@@ -1,7 +1,7 @@
-import redis from '../db/redis';
-import CONSTANTS from './constants';
+import redis from '../db/redis.js';
+import CONSTANTS from './constants.js';
 import { execSync } from 'child_process';
-import { getActiveTorrentCount } from '../db/redis-di';
+import { getActiveTorrentCount } from '../db/redis-di.js';
 
 /**
  * incrAccounce asynchronously calls an INCR operation

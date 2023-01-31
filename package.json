@@ -3,6 +3,7 @@
   "version": "1.0.0",
   "description": "An HTTP Bittorrent tracker",
   "main": "build/app.js",
+  "type": "module",
   "scripts": {
     "local": "npm run build && node build/app.js",
     "start": "node build/app.js",
@@ -12,6 +13,7 @@
   "author": "Raghu Saxena",
   "license": "ISC",
   "dependencies": {
+    "@ckcr4lyf/logger": "^0.0.5",
     "@types/express-rate-limit": "^5.0.0",
     "@types/morgan": "^1.9.1",
     "@types/redis": "^2.8.25",

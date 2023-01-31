@@ -4,10 +4,10 @@ import path from 'path';
 import { createServer } from 'http';
 import fs from 'fs';
 
-import './config';
-import router from './api/router';
-import { getLogger } from './helpers/logger';
-import { prepareMemoryExportData } from './helpers/promExporter';
+import './config.js';
+import router from './api/router.js';
+import { getLogger } from './helpers/logger.js';
+import { prepareMemoryExportData } from './helpers/promExporter.js';
 
 const app = express();
 

@@ -1,5 +1,5 @@
 import Redis from 'ioredis';
-import { getLogger } from '../helpers/logger';
+import { getLogger } from '../helpers/logger.js';
 
 const REDIS_HOST = process.env.REDIS_HOST || '127.0.0.1';
 const REDIS_PORT = parseInt(process.env.REDIS_PORT || '6379');
