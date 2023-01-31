@@ -1,6 +1,6 @@
-import R, { Redis } from "ioredis";
+import { Redis } from "ioredis";
 import { performance } from "perf_hooks";
-import { getLogger, getLoggerV3 } from "../helpers/logger.js";
+import { getLoggerV3 } from "../helpers/logger.js";
 
 const THIRTY_ONE_MINUTES = 1000 * 60 * 31;
 const TORRENTS_KEY = `TORRENTS`;
@@ -32,7 +32,7 @@ const sleep = (ms: number): Promise<void> => {
 export const cleanPeers = async (redisClient: Redis) => {
     const logger = getLoggerV3();
     const start = performance.now();
-    logger.info(`starting`);
+    logger.info(`[clean peers] starting`);
 
     let cursor = "0";
     let zSets = [];
@@ -84,18 +84,18 @@ export const cleanPeers = async (redisClient: Redis) => {
     }
     
     const end = performance.now();
-    logger.info(`Completed. Total time taken: ${(end - start).toFixed(2)}ms.`);
-    logger.info(`${countIterations} SCANs done, and ${countZSets} ZSETS cleaned.`);
+    logger.info(`[clean peers] Completed. Total time taken: ${(end - start).toFixed(2)}ms.`);
+    logger.info(`[clean peers] ${countIterations} SCANs done, and ${countZSets} ZSETS cleaned.`);
 
 }
 
 export const cleanJob = async (redisClient: Redis): Promise<void> => {
-    const logger = getLogger(`Redis.cleanJob`);
-    logger.info(`Starting`);
+    const logger = getLoggerV3();
+    logger.info(`[clean job] Starting`);
     const start = performance.now();
     
     const oldHashes = await getOldTorrents(redisClient);
-    logger.info(`Total ${oldHashes.length} torrents to clean`);
+    logger.info(`[clean job] Total ${oldHashes.length} torrents to clean`);
 
     const BATCH_SIZE = 1000;
     const batches = Math.ceil(oldHashes.length / BATCH_SIZE);
@@ -111,10 +111,9 @@ export const cleanJob = async (redisClient: Redis): Promise<void> => {
             pipeline.zrem(TORRENTS_KEY, oldHash);
         }
         
-        const gg = await pipeline.exec();
-        logger.info(`Completed batch no. ${i+1}/${batches}`);
+        await pipeline.exec();
     }
 
     const end = performance.now();
-    logger.info(`Completed. Total time taken: ${(end - start).toFixed(2)}ms.`);
+    logger.info(`[clean job] Completed. Total time taken: ${(end - start).toFixed(2)}ms.`);
 }

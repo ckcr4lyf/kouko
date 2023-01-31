@@ -5,7 +5,7 @@
 
 import express from "express";
 import { createServer } from "http";
-import { cleanJob } from "./db/redis-di.js";
+import { cleanJob, cleanPeers } from "./db/redis-di.js";
 import { getLogger } from "./helpers/logger.js";
 import { prepareExportData } from "./helpers/promExporter.js";
 import { redis } from './db/redis.js';
@@ -20,6 +20,10 @@ const logger = getLogger(`prom-server`);
 setInterval(() => {
     cleanJob(redis);
 }, 1000 * 60 * 10); // Every 10 minutes
+
+setInterval(() => {
+    cleanPeers(redis);
+}, 1000 * 60 * 30) // For peers, every 30 min
 
 const PROM_IP = process.env.PROM_IP || '127.0.0.1';
 const PROM_PORT = parseInt(process.env.PROM_PORT || '9999');
