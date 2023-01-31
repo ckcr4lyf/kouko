@@ -31,6 +31,7 @@ const sleep = (ms: number): Promise<void> => {
 
 export const cleanPeers = async (redisClient: Redis) => {
     const logger = getLoggerV3();
+    const start = performance.now();
     logger.info(`starting`);
 
     let cursor = "0";
@@ -81,8 +82,11 @@ export const cleanPeers = async (redisClient: Redis) => {
             break;
         }
     }
+    
+    const end = performance.now();
+    logger.info(`Completed. Total time taken: ${(end - start).toFixed(2)}ms.`);
+    logger.info(`${countIterations} SCANs done, and ${countZSets} ZSETS cleaned.`);
 
-    logger.info(`done. ${countIterations} SCANs done, and ${countZSets} ZSETS cleaned.`);
 }
 
 export const cleanJob = async (redisClient: Redis): Promise<void> => {
