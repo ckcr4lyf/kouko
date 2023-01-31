@@ -5,11 +5,11 @@
 
 import express from "express";
 import { createServer } from "http";
-import { cleanJob } from "./db/redis-di";
-import { getLogger } from "./helpers/logger";
-import { prepareExportData } from "./helpers/promExporter";
-import { redis } from './db/redis';
-import './config';
+import { cleanJob } from "./db/redis-di.js";
+import { getLogger } from "./helpers/logger.js";
+import { prepareExportData } from "./helpers/promExporter.js";
+import { redis } from './db/redis.js';
+import './config.js';
 
 // const p1 = redis.pipeline();
 // p1.set("BRUV", "BRUV");

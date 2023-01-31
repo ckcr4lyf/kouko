@@ -1,7 +1,8 @@
 import R, { Redis } from "ioredis";
 import { performance } from "perf_hooks";
-import { getLogger } from "../helpers/logger";
+import { getLogger, getLoggerV3 } from "../helpers/logger.js";
 
+const THIRTY_ONE_MINUTES = 1000 * 60 * 31;
 const TORRENTS_KEY = `TORRENTS`;
 
 export const updateTorrent = (redisClient: Redis, infohash: string): void => {
@@ -9,7 +10,6 @@ export const updateTorrent = (redisClient: Redis, infohash: string): void => {
 }
 
 export const getOldTorrents = (redisClient: Redis): Promise<string[]> => {
-    const THIRTY_ONE_MINUTES = 1000 * 60 * 31;
     return redisClient.zrangebyscore(TORRENTS_KEY, 0, Date.now() - THIRTY_ONE_MINUTES);
 }
 
@@ -20,6 +20,43 @@ export const cleanTorrentData = async (redisClient: Redis, infohash: string): Pr
 
 export const getActiveTorrentCount = async (redisClient: Redis): Promise<number> => {
     return redisClient.zcount(TORRENTS_KEY, '-inf', '+inf');
+}
+
+// only for testing...
+const sleep = (ms: number): Promise<void> => {
+    return new Promise((resolve, _) => {
+        setTimeout(resolve, ms);
+    })
+}
+
+export const cleanPeers = async (redisClient: Redis) => {
+    const logger = getLoggerV3();
+    logger.info(`starting`);
+
+    let cursor = "0";
+    let zSets = [];
+
+    while(true){
+        [cursor, zSets] = await redisClient.scan(cursor, "MATCH", "*_seeders");
+        logger.info(`Got ${zSets.length} torrents (Cursor: ${cursor})`);
+
+        const pipeline = redisClient.pipeline();
+
+        for (let zSet of zSets){
+            pipeline.zremrangebyscore(zSet, 0, Date.now() - THIRTY_ONE_MINUTES);
+        }
+
+        logger.info(`Going to execute pipeline to cleanup`);
+        await pipeline.exec();
+        logger.info(`Cleaned ${zSets.length} torrents`)
+
+        if (cursor === "0"){
+            logger.info(`cursor return to zero`);
+            break;
+        }
+    }
+
+    logger.info(`done`);
 }
 
 export const cleanJob = async (redisClient: Redis): Promise<void> => {

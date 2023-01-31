@@ -1,4 +1,4 @@
-import { urlHashToHexString } from "./byteFunctions";
+import { urlHashToHexString } from "./byteFunctions.js";
 
 const invalid = (param: string) => {
     return (!param || param === '');

@@ -1,5 +1,11 @@
 import fs from 'fs';
 import path from 'path';
+import { Logger as CLog, LOGLEVEL as CLevel } from '@ckcr4lyf/logger';
+
+import { dirname } from 'path';
+import { fileURLToPath } from 'url';
+
+const __dirname = dirname(fileURLToPath(import.meta.url));
 
 export default class Logger {
     logfile: string;
@@ -70,4 +76,10 @@ class LoggerV2 {
 
 export const getLogger = (loggerName: string) => {
     return new LoggerV2(loggerName);
+}
+
+export const getLoggerV3 = () => {
+    return new CLog({
+        loglevel: CLevel.INFO,
+    });
 }
