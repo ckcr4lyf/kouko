@@ -35,14 +35,18 @@ export const cleanPeers = async (redisClient: Redis) => {
 
     let cursor = "0";
     let zSets = [];
+    let countIterations = 0;
+    let countZSets = 0;
 
     while(true){
+        countIterations += 1;
         [cursor, zSets] = await redisClient.scan(cursor, "MATCH", "*_seeders");
         // logger.info(`Got ${zSets.length} torrents (Cursor: ${cursor})`);
 
         const pipeline = redisClient.pipeline();
 
         for (let zSet of zSets){
+            countZSets += 1;
             pipeline.zremrangebyscore(zSet, 0, Date.now() - THIRTY_ONE_MINUTES);
         }
 
@@ -51,12 +55,34 @@ export const cleanPeers = async (redisClient: Redis) => {
         // logger.info(`Cleaned ${zSets.length} torrents`)
 
         if (cursor === "0"){
-            logger.info(`cursor return to zero`);
+            logger.info(`cursor return to zero (seeders)`);
             break;
         }
     }
 
-    logger.info(`done`);
+    while(true){
+        countIterations += 1;
+        [cursor, zSets] = await redisClient.scan(cursor, "MATCH", "*_leechers");
+        // logger.info(`Got ${zSets.length} torrents (Cursor: ${cursor})`);
+
+        const pipeline = redisClient.pipeline();
+
+        for (let zSet of zSets){
+            countZSets += 1;
+            pipeline.zremrangebyscore(zSet, 0, Date.now() - THIRTY_ONE_MINUTES);
+        }
+
+        // logger.info(`Going to execute pipeline to cleanup`);
+        await pipeline.exec();
+        // logger.info(`Cleaned ${zSets.length} torrents`)
+
+        if (cursor === "0"){
+            logger.info(`cursor return to zero (leechers)`);
+            break;
+        }
+    }
+
+    logger.info(`done. ${countIterations} SCANs done, and ${countZSets} ZSETS cleaned.`);
 }
 
 export const cleanJob = async (redisClient: Redis): Promise<void> => {
