@@ -38,7 +38,7 @@ export const cleanPeers = async (redisClient: Redis) => {
 
     while(true){
         [cursor, zSets] = await redisClient.scan(cursor, "MATCH", "*_seeders");
-        logger.info(`Got ${zSets.length} torrents (Cursor: ${cursor})`);
+        // logger.info(`Got ${zSets.length} torrents (Cursor: ${cursor})`);
 
         const pipeline = redisClient.pipeline();
 
@@ -46,9 +46,9 @@ export const cleanPeers = async (redisClient: Redis) => {
             pipeline.zremrangebyscore(zSet, 0, Date.now() - THIRTY_ONE_MINUTES);
         }
 
-        logger.info(`Going to execute pipeline to cleanup`);
+        // logger.info(`Going to execute pipeline to cleanup`);
         await pipeline.exec();
-        logger.info(`Cleaned ${zSets.length} torrents`)
+        // logger.info(`Cleaned ${zSets.length} torrents`)
 
         if (cursor === "0"){
             logger.info(`cursor return to zero`);
