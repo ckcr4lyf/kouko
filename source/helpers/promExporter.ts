@@ -39,28 +39,6 @@ export const getTcpData = (): string => {
     }
 }
 
-export const getRedisData = (): string => {
-    const command = `redis-cli info memory`;
-    const acceptable = ['used_memory', 'used_memory_dataset']
-    
-    try {
-        const result = execSync(command).toString().split('\n').slice(1).filter(el => {
-            const trimmed = el.trim();
-            const parts = trimmed.split(':');
-            return acceptable.includes(parts[0]);
-        }).map(el => {
-            const trimmed = el.trim();
-            const parts = trimmed.split(':');
-            return `redis_mem_stats_${parts[0]} ${parts[1]}\n`;
-        });
-
-        return result.join('');
-    } catch (e){
-        console.log(`Failed to get redis data`);
-        return ``;
-    }
-}
-
 export const prepareMemoryExportData = (): string => {
     const command = `ps -o rss,command ax | grep ./kiryuu | head -n 1 | awk '{print $1}'`;
     
@@ -76,6 +54,7 @@ export const prepareExportData = async () => {
 
     let exportData = '';
 
+    const nochangeAnnounceCount = parseInt(await redis.get(CONSTANTS.KIRYUU_NOCHANGE_ANNOUNCE_COUNT_KEY) || '0');
     const announceCount = parseInt(await redis.get(CONSTANTS.KIRYUU_ANNOUNCE_COUNT_KEY) || '0');
     const avgRequestTime = parseInt(await redis.get(CONSTANTS.KIRYUU_REQ_DURATION_KEY) || '0');
     const activeTorrentsCount = await getActiveTorrentCount(redis);
@@ -88,12 +67,12 @@ export const prepareExportData = async () => {
         throw new Error("avgRequestTime was not a number");
     }
 
+    exportData += `kouko_http_nochange_request_count{status_code="200", method="GET", path="announce"} ${nochangeAnnounceCount}\n`;
     exportData += `kouko_http_request_count{status_code="200", method="GET", path="announce"} ${announceCount}\n`;
     exportData += `kouko_http_request_duration_sum{status_code="200", method="GET", path="announce"} ${avgRequestTime}\n`;
     exportData += `kouko_active_torrents ${activeTorrentsCount}\n`;
     exportData += getTcpData();
     exportData += prepareMemoryExportData();
-    exportData += getRedisData();
 
     return exportData;
 }
