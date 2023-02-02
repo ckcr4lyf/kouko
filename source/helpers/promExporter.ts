@@ -55,6 +55,7 @@ export const prepareExportData = async () => {
     let exportData = '';
 
     const nochangeAnnounceCount = parseInt(await redis.get(CONSTANTS.KIRYUU_NOCHANGE_ANNOUNCE_COUNT_KEY) || '0');
+    const cacheHitAnnounceCount = parseInt(await redis.get(CONSTANTS.KIRYUU_CACHE_HIT_ANNOUNCE_COUNT_KEY) || '0');
     const announceCount = parseInt(await redis.get(CONSTANTS.KIRYUU_ANNOUNCE_COUNT_KEY) || '0');
     const avgRequestTime = parseInt(await redis.get(CONSTANTS.KIRYUU_REQ_DURATION_KEY) || '0');
     const activeTorrentsCount = await getActiveTorrentCount(redis);
@@ -68,6 +69,7 @@ export const prepareExportData = async () => {
     }
 
     exportData += `kouko_http_nochange_request_count{status_code="200", method="GET", path="announce"} ${nochangeAnnounceCount}\n`;
+    exportData += `kouko_http_cache_hit_request_count{status_code="200", method="GET", path="announce"} ${cacheHitAnnounceCount}\n`;
     exportData += `kouko_http_request_count{status_code="200", method="GET", path="announce"} ${announceCount}\n`;
     exportData += `kouko_http_request_duration_sum{status_code="200", method="GET", path="announce"} ${avgRequestTime}\n`;
     exportData += `kouko_active_torrents ${activeTorrentsCount}\n`;
