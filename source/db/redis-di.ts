@@ -3,6 +3,7 @@ import { performance } from "perf_hooks";
 import { getLoggerV3 } from "../helpers/logger.js";
 
 const THIRTY_ONE_MINUTES = 1000 * 60 * 31;
+const ONE_HOUR = 1000 * 60 * 60;
 const TORRENTS_KEY = `TORRENTS`;
 
 export const updateTorrent = (redisClient: Redis, infohash: string): void => {
@@ -48,7 +49,7 @@ export const cleanPeers = async (redisClient: Redis) => {
 
         for (let zSet of zSets){
             countZSets += 1;
-            pipeline.zremrangebyscore(zSet, 0, Date.now() - THIRTY_ONE_MINUTES);
+            pipeline.zremrangebyscore(zSet, 0, Date.now() - ONE_HOUR);
         }
 
         // logger.info(`Going to execute pipeline to cleanup`);
@@ -70,7 +71,7 @@ export const cleanPeers = async (redisClient: Redis) => {
 
         for (let zSet of zSets){
             countZSets += 1;
-            pipeline.zremrangebyscore(zSet, 0, Date.now() - THIRTY_ONE_MINUTES);
+            pipeline.zremrangebyscore(zSet, 0, Date.now() - ONE_HOUR);
         }
 
         // logger.info(`Going to execute pipeline to cleanup`);

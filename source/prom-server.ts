@@ -17,13 +17,14 @@ import './config.js';
 
 const logger = getLogger(`prom-server`);
 
-setInterval(() => {
-    cleanJob(redis);
-}, 1000 * 60 * 60 * 12); // For torrents, every 12 hours
+setInterval(async () => {
+    await cleanJob(redis);
+    await cleanPeers(redis);
+}, 1000 * 60 * 60 * 12); // Do both, every 2 hours
 
-setInterval(() => {
-    cleanPeers(redis);
-}, 1000 * 60 * 60 * 24) // For peers, 24 hours
+// setInterval(() => {
+//     cleanPeers(redis);
+// }, 1000 * 60 * 60 * 24) // For peers, 24 hours
 
 const PROM_IP = process.env.PROM_IP || '127.0.0.1';
 const PROM_PORT = parseInt(process.env.PROM_PORT || '9999');
