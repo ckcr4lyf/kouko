@@ -19,11 +19,11 @@ const logger = getLogger(`prom-server`);
 
 setInterval(() => {
     cleanJob(redis);
-}, 1000 * 60 * 10); // Every 10 minutes
+}, 1000 * 60 * 60 * 12); // For torrents, every 12 hours
 
 setInterval(() => {
     cleanPeers(redis);
-}, 1000 * 60 * 30) // For peers, every 30 min
+}, 1000 * 60 * 60 * 24) // For peers, 24 hours
 
 const PROM_IP = process.env.PROM_IP || '127.0.0.1';
 const PROM_PORT = parseInt(process.env.PROM_PORT || '9999');
