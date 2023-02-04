@@ -20,7 +20,7 @@ const logger = getLogger(`prom-server`);
 setInterval(async () => {
     await cleanJob(redis);
     await cleanPeers(redis);
-}, 1000 * 60 * 60 * 12); // Do both, every 2 hours
+}, 1000 * 60 * 60 * 2); // Do both, every 2 hours
 
 // setInterval(() => {
 //     cleanPeers(redis);
