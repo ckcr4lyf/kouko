@@ -40,7 +40,7 @@ export const getTcpData = (): string => {
 }
 
 export const prepareMemoryExportData = (): string => {
-    const command = `ps -o rss,command ax | grep ./kiryuu | head -n 1 | awk '{print $1}'`;
+    const command = `ps -o rss,command ax | pgrep kiryuu | head -n 1 | awk '{print $1}'`;
     
     try {
         const result = execSync(command).toString().split('\n')[0];
