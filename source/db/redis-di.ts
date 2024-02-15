@@ -95,6 +95,7 @@ export const cleanJob = async (redisClient: Redis): Promise<void> => {
     logger.info(`[clean job] Starting`);
     const start = performance.now();
     
+    // zrangebyscore
     const oldHashes = await getOldTorrents(redisClient);
     logger.info(`[clean job] Total ${oldHashes.length} torrents to clean`);
 
